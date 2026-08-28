@@ -33,8 +33,17 @@ app.use(express.json());
 const TMP_DIR = path.join(__dirname, "tmp");
 if (!fs.existsSync(TMP_DIR)) fs.mkdirSync(TMP_DIR);
 
-// Serve rendered videos locally for now (testing only — replaced by R2 later)
-app.use("/files", express.static(TMP_DIR));
+// Serve rendered videos locally for now (testing only — replaced by R2 later).
+// Explicit CORS + range-request headers are needed here specifically because
+// browsers require them to fetch() a video as a blob (for download) rather
+// than just play it in a <video> tag.
+app.use("/files", (req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, HEAD");
+  next();
+}, express.static(TMP_DIR, {
+  acceptRanges: true
+}));
 
 app.get("/", (req, res) => {
   res.send("WishCraft backend is running.");
@@ -123,6 +132,9 @@ function renderVideo({ backgroundPath, photoPath, musicPath, outputPath, design,
 
     // geq-based alpha mask crops the square photo into a circle by making
     // every pixel outside the circle's radius fully transparent.
+    // scale+crop first forces any photo (portrait/landscape/square) into a
+    // true square by filling the box and cropping the overflow, instead of
+    // stretching it — this is what was distorting non-square photos before.
     const circleMaskFilter = isCircle
       ? `,format=rgba,geq=a='if(gt(pow(X-${boxW / 2},2)+pow(Y-${boxW / 2},2),pow(${boxW / 2},2)),0,255)':r='r(X,Y)':g='g(X,Y)':b='b(X,Y)'`
       : ",format=rgba"; // rounded-rect designs can extend this later with a different mask
@@ -132,7 +144,7 @@ function renderVideo({ backgroundPath, photoPath, musicPath, outputPath, design,
       : "";
 
     const filterComplex = [
-      `[1:v]scale=${boxW}:${boxW}${circleMaskFilter}[photo]`,
+      `[1:v]scale=${boxW}:${boxW}:force_original_aspect_ratio=increase,crop=${boxW}:${boxW}${circleMaskFilter}[photo]`,
       `[0:v][photo]overlay=x=${boxX}:y=${boxY}${nameOverlay}[videoOut]`
     ].join(";");
 
