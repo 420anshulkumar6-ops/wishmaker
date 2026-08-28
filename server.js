@@ -93,7 +93,13 @@ app.post("/render", async (req, res) => {
     // TODO: upload outputPath to Cloudflare R2 here and return the R2 public
     // URL instead. For now this returns a local URL for testing — it will
     // stop working once the server restarts or sleeps (free tier).
-    const videoUrl = `${req.protocol}://${req.get("host")}/files/${jobId}-output.mp4`;
+    //
+    // IMPORTANT: hard-code https:// here rather than using req.protocol.
+    // Render terminates TLS at its proxy and forwards requests to this
+    // server as plain HTTP internally, so req.protocol reports "http" even
+    // though the site is served over HTTPS — that mismatch was causing
+    // "Mixed Content" errors that silently blocked the video from loading.
+    const videoUrl = `https://${req.get("host")}/files/${jobId}-output.mp4`;
     res.json({ videoUrl });
 
   } catch (err) {
