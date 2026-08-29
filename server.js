@@ -71,11 +71,11 @@ function calculateBoxPixels(photoPosition, canvasW = 720, canvasH = 1280) {
  * to categoryConfig.js.
  *
  * POST /preview-position
- * body: { designId, photoUrl, topPercent, leftPercent, widthPercent, name }
+ * body: { designId, photoUrl, topPercent, leftPercent, widthPercent, name, nameTopPercent }
  * returns: a JPEG image directly (not JSON)
  */
 app.post("/preview-position", async (req, res) => {
-  const { designId, photoUrl, topPercent, leftPercent, widthPercent, name } = req.body;
+  const { designId, photoUrl, topPercent, leftPercent, widthPercent, name, nameTopPercent } = req.body;
 
   try {
     let design = null;
@@ -100,8 +100,11 @@ app.post("/preview-position", async (req, res) => {
       widthPercent: parseFloat(widthPercent),
       shape: design.photoPosition.shape
     };
+    const testNameTopPercent = (nameTopPercent !== undefined && nameTopPercent !== null && nameTopPercent !== "")
+      ? parseFloat(nameTopPercent)
+      : undefined; // falls back to the auto-calculated position if not provided
 
-    await renderSingleFrame({ backgroundPath, photoPath, framePath, photoPosition: testPosition, name });
+    await renderSingleFrame({ backgroundPath, photoPath, framePath, photoPosition: testPosition, nameTopPercent: testNameTopPercent, name });
 
     fs.unlinkSync(photoPath);
     res.sendFile(framePath, () => fs.unlink(framePath, () => {}));
@@ -187,6 +190,12 @@ function renderVideo({ backgroundPath, photoPath, musicPath, outputPath, design,
     const duration = design.videoDurationSeconds;
     const loopCount = Math.ceil(duration / design.sourceClipSeconds);
     const { boxW, boxX, boxY } = calculateBoxPixels(design.photoPosition);
+    // namePosition is independent of the photo box — falls back to just
+    // below the photo if a design hasn't defined one yet.
+    const nameTopPercent = design.namePosition?.topPercent ?? null;
+    const nameY = nameTopPercent !== null
+      ? Math.round((nameTopPercent / 100) * 1280)
+      : boxY + boxW + 70;
 
     const isCircle = shape === "circle";
 
@@ -200,7 +209,7 @@ function renderVideo({ backgroundPath, photoPath, musicPath, outputPath, design,
       : ",format=rgba"; // rounded-rect designs can extend this later with a different mask
 
     const nameOverlay = name
-      ? `,drawtext=text='${escapeForDrawtext(name)}':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=${boxY + boxW + 70}:borderw=3:bordercolor=black@0.5`
+      ? `,drawtext=text='${escapeForDrawtext(name)}':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=${nameY}:borderw=3:bordercolor=black@0.5`
       : "";
 
     const filterComplex = [
@@ -240,18 +249,21 @@ function escapeForDrawtext(text) {
  * frame instead of a full video — used only by /preview-position for fast
  * iteration while dialing in a new design's photoPosition values.
  */
-function renderSingleFrame({ backgroundPath, photoPath, framePath, photoPosition, name }) {
+function renderSingleFrame({ backgroundPath, photoPath, framePath, photoPosition, nameTopPercent, name }) {
   return new Promise((resolve, reject) => {
     const { shape } = photoPosition;
     const { boxW, boxX, boxY } = calculateBoxPixels(photoPosition);
     const isCircle = shape === "circle";
+    const nameY = (nameTopPercent !== null && nameTopPercent !== undefined)
+      ? Math.round((nameTopPercent / 100) * 1280)
+      : boxY + boxW + 70;
 
     const circleMaskFilter = isCircle
       ? `,format=rgba,geq=a='if(gt(pow(X-${boxW / 2},2)+pow(Y-${boxW / 2},2),pow(${boxW / 2},2)),0,255)':r='r(X,Y)':g='g(X,Y)':b='b(X,Y)'`
       : ",format=rgba";
 
     const nameOverlay = name
-      ? `,drawtext=text='${escapeForDrawtext(name)}':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=${boxY + boxW + 70}:borderw=3:bordercolor=black@0.5`
+      ? `,drawtext=text='${escapeForDrawtext(name)}':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=${nameY}:borderw=3:bordercolor=black@0.5`
       : "";
 
     const filterComplex = [
