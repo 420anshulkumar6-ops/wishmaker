@@ -11,9 +11,9 @@ const categorySettings = {
         id: "birthday-1",
         backgroundVideo: "assets/bg_birthday1.mp4", // bundled with this backend repo
         photoPosition: {
-          topPercent: 27,
+          topPercent: 24.5,
           leftPercent: 50,
-          widthPercent: 40,
+          widthPercent: 62.5,
           shape: "circle"
         },
         sourceClipSeconds: 4.7,
