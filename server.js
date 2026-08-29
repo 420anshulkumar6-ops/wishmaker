@@ -49,6 +49,69 @@ app.get("/", (req, res) => {
   res.send("WishCraft backend is running.");
 });
 
+/**
+ * Converts photoPosition percentages (from the position tool) into pixel
+ * coordinates on the 720x1280 canvas. Shared by /render and /preview-position
+ * so both always agree on where the photo box actually is.
+ */
+function calculateBoxPixels(photoPosition, canvasW = 720, canvasH = 1280) {
+  const { topPercent, leftPercent, widthPercent } = photoPosition;
+  const boxW = Math.round((widthPercent / 100) * canvasW);
+  const boxX = Math.round(((leftPercent / 100) * canvasW) - (boxW / 2));
+  const boxY = Math.round((topPercent / 100) * canvasH);
+  return { boxW, boxX, boxY };
+}
+
+/**
+ * DEV/TESTING ONLY — not part of the production wish-creation flow.
+ * Renders a SINGLE FRAME (not a full video) so you can quickly check where
+ * a photo lands for a given design + position values, without waiting for
+ * a full ~18s video render each time. Use this from the position-tester
+ * page to dial in photoPosition values for a new design before adding it
+ * to categoryConfig.js.
+ *
+ * POST /preview-position
+ * body: { designId, photoUrl, topPercent, leftPercent, widthPercent, name }
+ * returns: a JPEG image directly (not JSON)
+ */
+app.post("/preview-position", async (req, res) => {
+  const { designId, photoUrl, topPercent, leftPercent, widthPercent, name } = req.body;
+
+  try {
+    let design = null;
+    for (const cat of Object.values(categorySettings)) {
+      const found = cat.designs.find(d => d.id === designId);
+      if (found) { design = found; break; }
+    }
+    if (!design) return res.status(400).json({ error: "Unknown design: " + designId });
+    if (!photoUrl) return res.status(400).json({ error: "photoUrl is required" });
+
+    const jobId = uuidv4();
+    const photoPath = path.join(TMP_DIR, `${jobId}-photo.jpg`);
+    const framePath = path.join(TMP_DIR, `${jobId}-frame.jpg`);
+
+    const photoResponse = await axios.get(photoUrl, { responseType: "arraybuffer" });
+    fs.writeFileSync(photoPath, photoResponse.data);
+
+    const backgroundPath = path.join(__dirname, design.backgroundVideo);
+    const testPosition = {
+      topPercent: parseFloat(topPercent),
+      leftPercent: parseFloat(leftPercent),
+      widthPercent: parseFloat(widthPercent),
+      shape: design.photoPosition.shape
+    };
+
+    await renderSingleFrame({ backgroundPath, photoPath, framePath, photoPosition: testPosition, name });
+
+    fs.unlinkSync(photoPath);
+    res.sendFile(framePath, () => fs.unlink(framePath, () => {}));
+
+  } catch (err) {
+    console.error("Preview failed:", err);
+    res.status(500).json({ error: "Preview render failed" });
+  }
+});
+
 app.post("/render", async (req, res) => {
   const { theme, designId, name, musicId, photoUrl } = req.body;
 
@@ -120,19 +183,10 @@ app.post("/render", async (req, res) => {
  */
 function renderVideo({ backgroundPath, photoPath, musicPath, outputPath, design, name }) {
   return new Promise((resolve, reject) => {
-    const { topPercent, leftPercent, widthPercent, shape } = design.photoPosition;
+    const { shape } = design.photoPosition;
     const duration = design.videoDurationSeconds;
     const loopCount = Math.ceil(duration / design.sourceClipSeconds);
-
-    // Photo box size/position in pixels, assuming a 720x1280 canvas
-    // (matches the background clips as produced by Canva/Google Flow).
-    const canvasW = 720;
-    const canvasH = 1280;
-    const boxW = Math.round((widthPercent / 100) * canvasW);
-    const boxX = Math.round(((leftPercent / 100) * canvasW) - (boxW / 2));
-    const boxY = Math.round((topPercent / 100) * canvasH);
-    // topPercent (from the position-adjuster tool) is the box's TOP edge,
-    // leftPercent is the box's horizontal CENTER — matches how the tool reports values.
+    const { boxW, boxX, boxY } = calculateBoxPixels(design.photoPosition);
 
     const isCircle = shape === "circle";
 
@@ -179,6 +233,44 @@ function renderVideo({ backgroundPath, photoPath, musicPath, outputPath, design,
 // Basic sanitization so a name can't break out of the drawtext filter string
 function escapeForDrawtext(text) {
   return text.replace(/[\\':]/g, "").slice(0, 30);
+}
+
+/**
+ * Same photo-crop + overlay logic as renderVideo, but outputs a single JPEG
+ * frame instead of a full video — used only by /preview-position for fast
+ * iteration while dialing in a new design's photoPosition values.
+ */
+function renderSingleFrame({ backgroundPath, photoPath, framePath, photoPosition, name }) {
+  return new Promise((resolve, reject) => {
+    const { shape } = photoPosition;
+    const { boxW, boxX, boxY } = calculateBoxPixels(photoPosition);
+    const isCircle = shape === "circle";
+
+    const circleMaskFilter = isCircle
+      ? `,format=rgba,geq=a='if(gt(pow(X-${boxW / 2},2)+pow(Y-${boxW / 2},2),pow(${boxW / 2},2)),0,255)':r='r(X,Y)':g='g(X,Y)':b='b(X,Y)'`
+      : ",format=rgba";
+
+    const nameOverlay = name
+      ? `,drawtext=text='${escapeForDrawtext(name)}':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=${boxY + boxW + 70}:borderw=3:bordercolor=black@0.5`
+      : "";
+
+    const filterComplex = [
+      `[1:v]scale=${boxW}:${boxW}:force_original_aspect_ratio=increase,crop=${boxW}:${boxW}${circleMaskFilter}[photo]`,
+      `[0:v][photo]overlay=x=${boxX}:y=${boxY}${nameOverlay}[frameOut]`
+    ].join(";");
+
+    ffmpeg()
+      .input(backgroundPath)
+      .input(photoPath)
+      .complexFilter(filterComplex)
+      .outputOptions([
+        "-map", "[frameOut]",
+        "-frames:v", "1"
+      ])
+      .on("end", () => resolve())
+      .on("error", (err) => reject(err))
+      .save(framePath);
+  });
 }
 
 const PORT = process.env.PORT || 3000;
