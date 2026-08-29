@@ -16,6 +16,12 @@ const categorySettings = {
           widthPercent: 62.5,
           shape: "circle"
         },
+        // Independent from photoPosition — the name label doesn't have to
+        // sit at a fixed offset below the photo, since designs vary (some
+        // have a ribbon far below the circle, some right underneath).
+        namePosition: {
+          topPercent: 58
+        },
         sourceClipSeconds: 4.7,
         videoDurationSeconds: 18
       }
