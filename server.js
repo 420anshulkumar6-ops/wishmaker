@@ -116,7 +116,7 @@ app.post("/preview-position", async (req, res) => {
 });
 
 app.post("/render", async (req, res) => {
-  const { theme, designId, name, musicId, photoUrl } = req.body;
+  const { theme, designId, name, quote, musicId, photoUrl } = req.body;
 
   try {
     // ---- 1. Validate & look up config ----
@@ -149,7 +149,8 @@ app.post("/render", async (req, res) => {
       musicPath,
       outputPath,
       design,
-      name
+      name,
+      quote
     });
 
     // ---- 4. Clean up the downloaded photo (we don't need to keep it) ----
@@ -184,18 +185,22 @@ app.post("/render", async (req, res) => {
  *  - replaces the background clip's own audio with the chosen music track,
  *    trimmed/looped to match the final video length
  */
-function renderVideo({ backgroundPath, photoPath, musicPath, outputPath, design, name }) {
+function renderVideo({ backgroundPath, photoPath, musicPath, outputPath, design, name, quote }) {
   return new Promise((resolve, reject) => {
     const { shape } = design.photoPosition;
     const duration = design.videoDurationSeconds;
     const loopCount = Math.ceil(duration / design.sourceClipSeconds);
     const { boxW, boxX, boxY } = calculateBoxPixels(design.photoPosition);
-    // namePosition is independent of the photo box — falls back to just
-    // below the photo if a design hasn't defined one yet.
+    // namePosition/quotePosition are independent of the photo box — each
+    // falls back to a reasonable default if a design hasn't defined one.
     const nameTopPercent = design.namePosition?.topPercent ?? null;
     const nameY = nameTopPercent !== null
       ? Math.round((nameTopPercent / 100) * 1280)
       : boxY + boxW + 70;
+    const quoteTopPercent = design.quotePosition?.topPercent ?? null;
+    const quoteY = quoteTopPercent !== null
+      ? Math.round((quoteTopPercent / 100) * 1280)
+      : nameY + 60;
 
     const isCircle = shape === "circle";
 
@@ -212,9 +217,14 @@ function renderVideo({ backgroundPath, photoPath, musicPath, outputPath, design,
       ? `,drawtext=text='${escapeForDrawtext(name)}':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=${nameY}:borderw=3:bordercolor=black@0.5`
       : "";
 
+    // Quote uses a smaller font since it's typically a longer line than a name.
+    const quoteOverlay = quote
+      ? `,drawtext=text='${escapeForDrawtext(quote, 60)}':fontcolor=white:fontsize=30:x=(w-text_w)/2:y=${quoteY}:borderw=2:bordercolor=black@0.5`
+      : "";
+
     const filterComplex = [
       `[1:v]scale=${boxW}:${boxW}:force_original_aspect_ratio=increase,crop=${boxW}:${boxW}${circleMaskFilter}[photo]`,
-      `[0:v][photo]overlay=x=${boxX}:y=${boxY}${nameOverlay}[videoOut]`
+      `[0:v][photo]overlay=x=${boxX}:y=${boxY}${nameOverlay}${quoteOverlay}[videoOut]`
     ].join(";");
 
     ffmpeg()
@@ -239,9 +249,9 @@ function renderVideo({ backgroundPath, photoPath, musicPath, outputPath, design,
   });
 }
 
-// Basic sanitization so a name can't break out of the drawtext filter string
-function escapeForDrawtext(text) {
-  return text.replace(/[\\':]/g, "").slice(0, 30);
+// Basic sanitization so text can't break out of the drawtext filter string
+function escapeForDrawtext(text, maxLength = 30) {
+  return text.replace(/[\\':]/g, "").slice(0, maxLength);
 }
 
 /**
