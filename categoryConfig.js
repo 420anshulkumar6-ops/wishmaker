@@ -1,8 +1,13 @@
 // ===== categoryConfig.js (backend copy) =====
-// IMPORTANT: this must stay in sync with the frontend's js/category-config.js.
-// The frontend uses this data to build the form UI; the backend uses the
-// exact same photoPosition/video values to actually render the video with FFmpeg.
-// When you add a new design on the frontend, copy the same entry here too.
+// IMPORTANT: this must stay in sync with the frontend's js/category-config.js —
+// specifically the designId, photoPosition, namePosition, music file names,
+// and videoDurationSeconds for every design. The frontend drives the UI;
+// this file drives the actual FFmpeg render, so a mismatch here means the
+// video won't match what the user saw on the form.
+//
+// The frontend also carries `fields`, `article`, `previewVideo`, `label`,
+// `icon`, and `tagline` — the backend doesn't need those, so they're
+// intentionally left out here to keep this file focused on render-inputs only.
 
 const categorySettings = {
   birthday: {
@@ -16,23 +21,46 @@ const categorySettings = {
           widthPercent: 62.5,
           shape: "circle"
         },
-        // Independent from photoPosition — the name label doesn't have to
-        // sit at a fixed offset below the photo, since designs vary (some
-        // have a ribbon far below the circle, some right underneath).
         namePosition: {
           topPercent: 58
         },
         sourceClipSeconds: 4.7,
-        videoDurationSeconds: 18
+        videoDurationSeconds: 18,
+        music: [
+          { id: "m1", file: "music/birthday-1.mp3" },
+          { id: "m2", file: "music/birthday-2.mp3" },
+          { id: "m3", file: "music/birthday-3.mp3" },
+          { id: "m4", file: "music/birthday-4.mp3" }
+        ]
       }
-    ],
-    music: [
-      { id: "m1", file: "music/birthday-1.mp3" },
-      { id: "m2", file: "music/birthday-2.mp3" },
-      { id: "m3", file: "music/birthday-3.mp3" },
-      { id: "m4", file: "music/birthday-4.mp3" }
+
+      // Next design (mirror the frontend entry — same id, same measured values):
+      // {
+      //   id: "birthday-2",
+      //   backgroundVideo: "assets/bg_birthday2.mp4",
+      //   photoPosition: { topPercent: 0, leftPercent: 50, widthPercent: 0, shape: "circle" },
+      //   namePosition: { topPercent: 0 },
+      //   sourceClipSeconds: 0,
+      //   videoDurationSeconds: 18,
+      //   music: [ ... ]
+      // }
     ]
   }
+
+  // Next category (mirror the frontend entry):
+  // diwali: {
+  //   designs: [
+  //     {
+  //       id: "diwali-1",
+  //       backgroundVideo: "assets/bg_diwali1.mp4",
+  //       photoPosition: { topPercent: 0, leftPercent: 50, widthPercent: 0, shape: "circle" },
+  //       namePosition: { topPercent: 0 },
+  //       sourceClipSeconds: 0,
+  //       videoDurationSeconds: 18,
+  //       music: [ ... ]
+  //     }
+  //   ]
+  // }
 };
 
 module.exports = { categorySettings };
