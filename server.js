@@ -126,7 +126,7 @@ app.post("/render", async (req, res) => {
     const design = category.designs.find(d => d.id === designId);
     if (!design) return res.status(400).json({ error: "Unknown design: " + designId });
 
-    const track = category.music.find(m => m.id === musicId);
+    const track = design.music.find(m => m.id === musicId);
     if (!track) return res.status(400).json({ error: "Unknown music id: " + musicId });
 
     if (!photoUrl) return res.status(400).json({ error: "photoUrl is required" });
