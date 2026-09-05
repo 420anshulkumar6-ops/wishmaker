@@ -47,20 +47,56 @@ const categorySettings = {
     ]
   }
 
-  // Next category (mirror the frontend entry):
-  // diwali: {
-  //   designs: [
-  //     {
-  //       id: "diwali-1",
-  //       backgroundVideo: "assets/bg_diwali1.mp4",
-  //       photoPosition: { topPercent: 0, leftPercent: 50, widthPercent: 0, shape: "circle" },
-  //       namePosition: { topPercent: 0 },
-  //       sourceClipSeconds: 0,
-  //       videoDurationSeconds: 18,
-  //       music: [ ... ]
-  //     }
-  //   ]
-  // }
+  ,rakhi: {
+    designs: [
+      {
+        id: "rakhi-1",
+        backgroundVideo: "assets/bg_rakhi1.mp4", // ⬅️ ADD THIS FILE to backend's /assets folder too
+        photoPosition: { topPercent: 24.5, leftPercent: 50, widthPercent: 62.5, shape: "circle" },
+        namePosition: { topPercent: 58 },
+        sourceClipSeconds: 4.7,
+        videoDurationSeconds: 18,
+        music: [
+          { id: "m1", file: "music/rakhi-1.mp3" }, // ⬅️ ADD
+          { id: "m2", file: "music/rakhi-2.mp3" }  // ⬅️ ADD
+        ]
+      }
+    ]
+  }
+
+  ,diwali: {
+    designs: [
+      {
+        id: "diwali-1",
+        backgroundVideo: "assets/bg_diwali1.mp4", // ⬅️ ADD THIS FILE to backend's /assets folder too
+        photoPosition: { topPercent: 24.5, leftPercent: 50, widthPercent: 62.5, shape: "square" },
+        namePosition: { topPercent: 58 },
+        sourceClipSeconds: 4.7,
+        videoDurationSeconds: 18,
+        music: [
+          { id: "m1", file: "music/diwali-1.mp3" }, // ⬅️ ADD
+          { id: "m2", file: "music/diwali-2.mp3" }  // ⬅️ ADD
+        ]
+      }
+    ]
+  }
+
+  ,anniversary: {
+    designs: [
+      {
+        id: "anniversary-1",
+        backgroundVideo: "assets/bg_anniversary1.mp4", // ⬅️ ADD THIS FILE to backend's /assets folder too
+        photoPosition: { topPercent: 24.5, leftPercent: 50, widthPercent: 62.5, shape: "circle" },
+        namePosition: { topPercent: 58 },
+        sourceClipSeconds: 4.7,
+        videoDurationSeconds: 18,
+        music: [
+          { id: "m1", file: "music/anniversary-1.mp3" }, // ⬅️ ADD
+          { id: "m2", file: "music/anniversary-2.mp3" }  // ⬅️ ADD
+        ]
+      }
+    ]
+  }
 };
 
 module.exports = { categorySettings };
