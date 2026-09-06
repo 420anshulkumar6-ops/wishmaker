@@ -97,6 +97,74 @@ const categorySettings = {
       }
     ]
   }
+
+  ,independence: {
+    designs: [
+      {
+        id: "independence-1",
+        backgroundVideo: "assets/bg_independence1.mp4", // ⬅️ ADD THIS FILE to backend's /assets folder too
+        photoPosition: { topPercent: 24.5, leftPercent: 50, widthPercent: 62.5, shape: "square" },
+        namePosition: { topPercent: 58 },
+        sourceClipSeconds: 4.7,
+        videoDurationSeconds: 18,
+        music: [
+          { id: "m1", file: "music/independence-1.mp3" }, // ⬅️ ADD
+          { id: "m2", file: "music/independence-2.mp3" }  // ⬅️ ADD
+        ]
+      }
+    ]
+  }
+
+  ,holi: {
+    designs: [
+      {
+        id: "holi-1",
+        backgroundVideo: "assets/bg_holi1.mp4", // ⬅️ ADD THIS FILE to backend's /assets folder too
+        photoPosition: { topPercent: 24.5, leftPercent: 50, widthPercent: 62.5, shape: "circle" },
+        namePosition: { topPercent: 58 },
+        sourceClipSeconds: 4.7,
+        videoDurationSeconds: 18,
+        music: [
+          { id: "m1", file: "music/holi-1.mp3" }, // ⬅️ ADD
+          { id: "m2", file: "music/holi-2.mp3" }  // ⬅️ ADD
+        ]
+      }
+    ]
+  }
+
+  ,newyear: {
+    designs: [
+      {
+        id: "newyear-1",
+        backgroundVideo: "assets/bg_newyear1.mp4", // ⬅️ ADD THIS FILE to backend's /assets folder too
+        photoPosition: { topPercent: 24.5, leftPercent: 50, widthPercent: 62.5, shape: "square" },
+        namePosition: { topPercent: 58 },
+        sourceClipSeconds: 4.7,
+        videoDurationSeconds: 18,
+        music: [
+          { id: "m1", file: "music/newyear-1.mp3" }, // ⬅️ ADD
+          { id: "m2", file: "music/newyear-2.mp3" }  // ⬅️ ADD
+        ]
+      }
+    ]
+  }
+
+  ,wedding: {
+    designs: [
+      {
+        id: "wedding-1",
+        backgroundVideo: "assets/bg_wedding1.mp4", // ⬅️ ADD THIS FILE to backend's /assets folder too
+        photoPosition: { topPercent: 24.5, leftPercent: 50, widthPercent: 62.5, shape: "circle" },
+        namePosition: { topPercent: 58 },
+        sourceClipSeconds: 4.7,
+        videoDurationSeconds: 18,
+        music: [
+          { id: "m1", file: "music/wedding-1.mp3" }, // ⬅️ ADD
+          { id: "m2", file: "music/wedding-2.mp3" }  // ⬅️ ADD
+        ]
+      }
+    ]
+  }
 };
 
 module.exports = { categorySettings };
