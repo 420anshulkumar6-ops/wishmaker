@@ -33,17 +33,160 @@ const categorySettings = {
           { id: "m4", file: "music/birthday-4.mp3" }
         ]
       }
-
-      // Next design (mirror the frontend entry — same id, same measured values):
-      // {
-      //   id: "birthday-2",
-      //   backgroundVideo: "assets/bg_birthday2.mp4",
-      //   photoPosition: { topPercent: 0, leftPercent: 50, widthPercent: 0, shape: "circle" },
-      //   namePosition: { topPercent: 0 },
-      //   sourceClipSeconds: 0,
-      //   videoDurationSeconds: 18,
-      //   music: [ ... ]
-      // }
+      ,{
+        id: "birthday-2",
+        backgroundVideo: "assets/bg_birthday1.mp4", // reusing birthday-1's video
+        photoPosition: { topPercent: 24.5, leftPercent: 50, widthPercent: 62.5, shape: "circle" },
+        namePosition: { topPercent: 58 },
+        sourceClipSeconds: 4.7,
+        videoDurationSeconds: 18,
+        music: [
+          { id: "m1", file: "music/birthday-1.mp3" },
+          { id: "m2", file: "music/birthday-2.mp3" },
+          { id: "m3", file: "music/birthday-3.mp3" },
+          { id: "m4", file: "music/birthday-4.mp3" }
+        ]
+      }
+      ,{
+        id: "birthday-3",
+        backgroundVideo: "assets/bg_birthday1.mp4", // reusing birthday-1's video
+        photoPosition: { topPercent: 24.5, leftPercent: 50, widthPercent: 62.5, shape: "circle" },
+        namePosition: { topPercent: 58 },
+        sourceClipSeconds: 4.7,
+        videoDurationSeconds: 18,
+        music: [
+          { id: "m1", file: "music/birthday-1.mp3" },
+          { id: "m2", file: "music/birthday-2.mp3" },
+          { id: "m3", file: "music/birthday-3.mp3" },
+          { id: "m4", file: "music/birthday-4.mp3" }
+        ]
+      }
+      ,{
+        id: "birthday-4",
+        backgroundVideo: "assets/bg_birthday1.mp4", // reusing birthday-1's video
+        photoPosition: { topPercent: 24.5, leftPercent: 50, widthPercent: 62.5, shape: "circle" },
+        namePosition: { topPercent: 58 },
+        sourceClipSeconds: 4.7,
+        videoDurationSeconds: 18,
+        music: [
+          { id: "m1", file: "music/birthday-1.mp3" },
+          { id: "m2", file: "music/birthday-2.mp3" },
+          { id: "m3", file: "music/birthday-3.mp3" },
+          { id: "m4", file: "music/birthday-4.mp3" }
+        ]
+      }
+      ,{
+        id: "birthday-5",
+        backgroundVideo: "assets/bg_birthday1.mp4", // reusing birthday-1's video
+        photoPosition: { topPercent: 24.5, leftPercent: 50, widthPercent: 62.5, shape: "circle" },
+        namePosition: { topPercent: 58 },
+        sourceClipSeconds: 4.7,
+        videoDurationSeconds: 18,
+        music: [
+          { id: "m1", file: "music/birthday-1.mp3" },
+          { id: "m2", file: "music/birthday-2.mp3" },
+          { id: "m3", file: "music/birthday-3.mp3" },
+          { id: "m4", file: "music/birthday-4.mp3" }
+        ]
+      }
+      ,{
+        id: "birthday-6",
+        backgroundVideo: "assets/bg_birthday1.mp4", // reusing birthday-1's video
+        photoPosition: { topPercent: 24.5, leftPercent: 50, widthPercent: 62.5, shape: "circle" },
+        namePosition: { topPercent: 58 },
+        sourceClipSeconds: 4.7,
+        videoDurationSeconds: 18,
+        music: [
+          { id: "m1", file: "music/birthday-1.mp3" },
+          { id: "m2", file: "music/birthday-2.mp3" },
+          { id: "m3", file: "music/birthday-3.mp3" },
+          { id: "m4", file: "music/birthday-4.mp3" }
+        ]
+      }
+      ,{
+        id: "birthday-7",
+        backgroundVideo: "assets/bg_birthday1.mp4", // reusing birthday-1's video
+        photoPosition: { topPercent: 24.5, leftPercent: 50, widthPercent: 62.5, shape: "circle" },
+        namePosition: { topPercent: 58 },
+        sourceClipSeconds: 4.7,
+        videoDurationSeconds: 18,
+        music: [
+          { id: "m1", file: "music/birthday-1.mp3" },
+          { id: "m2", file: "music/birthday-2.mp3" },
+          { id: "m3", file: "music/birthday-3.mp3" },
+          { id: "m4", file: "music/birthday-4.mp3" }
+        ]
+      }
+      ,{
+        id: "birthday-8",
+        backgroundVideo: "assets/bg_birthday1.mp4", // reusing birthday-1's video
+        photoPosition: { topPercent: 24.5, leftPercent: 50, widthPercent: 62.5, shape: "circle" },
+        namePosition: { topPercent: 58 },
+        sourceClipSeconds: 4.7,
+        videoDurationSeconds: 18,
+        music: [
+          { id: "m1", file: "music/birthday-1.mp3" },
+          { id: "m2", file: "music/birthday-2.mp3" },
+          { id: "m3", file: "music/birthday-3.mp3" },
+          { id: "m4", file: "music/birthday-4.mp3" }
+        ]
+      }
+      ,{
+        id: "birthday-9",
+        backgroundVideo: "assets/bg_birthday1.mp4", // reusing birthday-1's video
+        photoPosition: { topPercent: 24.5, leftPercent: 50, widthPercent: 62.5, shape: "circle" },
+        namePosition: { topPercent: 58 },
+        sourceClipSeconds: 4.7,
+        videoDurationSeconds: 18,
+        music: [
+          { id: "m1", file: "music/birthday-1.mp3" },
+          { id: "m2", file: "music/birthday-2.mp3" },
+          { id: "m3", file: "music/birthday-3.mp3" },
+          { id: "m4", file: "music/birthday-4.mp3" }
+        ]
+      }
+      ,{
+        id: "birthday-10",
+        backgroundVideo: "assets/bg_birthday1.mp4", // reusing birthday-1's video
+        photoPosition: { topPercent: 24.5, leftPercent: 50, widthPercent: 62.5, shape: "circle" },
+        namePosition: { topPercent: 58 },
+        sourceClipSeconds: 4.7,
+        videoDurationSeconds: 18,
+        music: [
+          { id: "m1", file: "music/birthday-1.mp3" },
+          { id: "m2", file: "music/birthday-2.mp3" },
+          { id: "m3", file: "music/birthday-3.mp3" },
+          { id: "m4", file: "music/birthday-4.mp3" }
+        ]
+      }
+      ,{
+        id: "birthday-11",
+        backgroundVideo: "assets/bg_birthday1.mp4", // reusing birthday-1's video
+        photoPosition: { topPercent: 24.5, leftPercent: 50, widthPercent: 62.5, shape: "circle" },
+        namePosition: { topPercent: 58 },
+        sourceClipSeconds: 4.7,
+        videoDurationSeconds: 18,
+        music: [
+          { id: "m1", file: "music/birthday-1.mp3" },
+          { id: "m2", file: "music/birthday-2.mp3" },
+          { id: "m3", file: "music/birthday-3.mp3" },
+          { id: "m4", file: "music/birthday-4.mp3" }
+        ]
+      }
+      ,{
+        id: "birthday-12",
+        backgroundVideo: "assets/bg_birthday1.mp4", // reusing birthday-1's video
+        photoPosition: { topPercent: 24.5, leftPercent: 50, widthPercent: 62.5, shape: "circle" },
+        namePosition: { topPercent: 58 },
+        sourceClipSeconds: 4.7,
+        videoDurationSeconds: 18,
+        music: [
+          { id: "m1", file: "music/birthday-1.mp3" },
+          { id: "m2", file: "music/birthday-2.mp3" },
+          { id: "m3", file: "music/birthday-3.mp3" },
+          { id: "m4", file: "music/birthday-4.mp3" }
+        ]
+      }
     ]
   }
 
