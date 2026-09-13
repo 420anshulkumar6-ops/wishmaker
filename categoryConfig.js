@@ -18,13 +18,13 @@ const categorySettings = {
         photoPosition: {
           topPercent: 24.5,
           leftPercent: 50,
-          widthPercent: 62.5,
+          widthPercent: 47.5,
           shape: "circle"
         },
         namePosition: {
-          topPercent: 58
+          topPercent: 52
         },
-        sourceClipSeconds: 4.7,
+        sourceClipSeconds: 8,
         videoDurationSeconds: 18,
         music: [
           { id: "m1", file: "music/birthday-1.mp3" },
