@@ -71,11 +71,15 @@ function calculateBoxPixels(photoPosition, canvasW = 720, canvasH = 1280) {
  * to categoryConfig.js.
  *
  * POST /preview-position
- * body: { designId, photoUrl, topPercent, leftPercent, widthPercent, name, nameTopPercent }
+ * body: { designId, photoUrl, topPercent, leftPercent, widthPercent, name,
+ *         nameTopPercent, nameLeftPercent, nameFontSize, nameFontColor }
  * returns: a JPEG image directly (not JSON)
  */
 app.post("/preview-position", async (req, res) => {
-  const { designId, photoUrl, topPercent, leftPercent, widthPercent, name, nameTopPercent } = req.body;
+  const {
+    designId, photoUrl, topPercent, leftPercent, widthPercent, name,
+    nameTopPercent, nameLeftPercent, nameFontSize, nameFontColor
+  } = req.body;
 
   try {
     let design = null;
@@ -104,7 +108,23 @@ app.post("/preview-position", async (req, res) => {
       ? parseFloat(nameTopPercent)
       : undefined; // falls back to the auto-calculated position if not provided
 
-    await renderSingleFrame({ backgroundPath, photoPath, framePath, photoPosition: testPosition, nameTopPercent: testNameTopPercent, name });
+    // All optional dev-tool overrides — when omitted, production defaults
+    // (centered, auto font size, maroon) apply inside renderSingleFrame.
+    const testNameLeftPercent = (nameLeftPercent !== undefined && nameLeftPercent !== null && nameLeftPercent !== "")
+      ? parseFloat(nameLeftPercent)
+      : undefined;
+    const testNameFontSize = (nameFontSize !== undefined && nameFontSize !== null && nameFontSize !== "")
+      ? parseInt(nameFontSize, 10)
+      : undefined;
+    const testNameFontColor = (nameFontColor && nameFontColor.trim() !== "")
+      ? nameFontColor.trim()
+      : undefined;
+
+    await renderSingleFrame({
+      backgroundPath, photoPath, framePath, photoPosition: testPosition,
+      nameTopPercent: testNameTopPercent, name,
+      nameLeftPercent: testNameLeftPercent, nameFontSize: testNameFontSize, nameFontColor: testNameFontColor
+    });
 
     fs.unlinkSync(photoPath);
     res.sendFile(framePath, () => fs.unlink(framePath, () => {}));
@@ -213,8 +233,17 @@ function renderVideo({ backgroundPath, photoPath, musicPath, outputPath, design,
       ? `,format=rgba,geq=a='if(gt(pow(X-${boxW / 2},2)+pow(Y-${boxW / 2},2),pow(${boxW / 2},2)),0,255)':r='r(X,Y)':g='g(X,Y)':b='b(X,Y)'`
       : ",format=rgba"; // rounded-rect designs can extend this later with a different mask
 
+    // Font size shrinks for longer names so they stay inside the ribbon —
+    // short names ("Om") stay bold at 48px, long ones ("Balram Meena")
+    // step down so the text width stays roughly within the ribbon's usable
+    // area (~430px at the current design width). Tune the thresholds here
+    // if a future design's ribbon is a different width.
+    const nameFontSize = getNameFontSize(name);
+
+    // Dark maroon (matches the "जन्मदिन की हार्दिक शुभकामनाएं" text below it)
+    // reads clearly on the pink ribbon — plain white blended into it before.
     const nameOverlay = name
-      ? `,drawtext=text='${escapeForDrawtext(name)}':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=${nameY}:borderw=3:bordercolor=black@0.5`
+      ? `,drawtext=text='${escapeForDrawtext(name)}':fontcolor=0x6B1220:fontsize=${nameFontSize}:x=(w-text_w)/2:y=${nameY}:borderw=2:bordercolor=white@0.6`
       : "";
 
     // Quote uses a smaller font since it's typically a longer line than a name.
@@ -254,12 +283,34 @@ function escapeForDrawtext(text, maxLength = 30) {
   return text.replace(/[\\':]/g, "").slice(0, maxLength);
 }
 
+// Picks a font size so the rendered name stays roughly within the ribbon's
+// usable width (~430px on the current 720px-wide design) instead of a fixed
+// size that overflows for long names and looks too small for short ones.
+// Rough estimate: this font averages ~0.55x fontSize per character width.
+function getNameFontSize(name) {
+  if (!name) return 48;
+  const len = name.trim().length;
+  if (len <= 8) return 52;
+  if (len <= 12) return 46;
+  if (len <= 16) return 38;
+  if (len <= 20) return 32;
+  return 26; // very long names — still readable, guaranteed to fit
+}
+
 /**
  * Same photo-crop + overlay logic as renderVideo, but outputs a single JPEG
  * frame instead of a full video — used only by /preview-position for fast
  * iteration while dialing in a new design's photoPosition values.
+ *
+ * nameLeftPercent/nameFontSize/nameFontColor are dev-tool-only overrides for
+ * testing name styling live; renderVideo (the real production path) never
+ * passes these, so production always uses the centered/auto-sized/maroon
+ * defaults regardless of what's tested here.
  */
-function renderSingleFrame({ backgroundPath, photoPath, framePath, photoPosition, nameTopPercent, name }) {
+function renderSingleFrame({
+  backgroundPath, photoPath, framePath, photoPosition, nameTopPercent, name,
+  nameLeftPercent, nameFontSize, nameFontColor
+}) {
   return new Promise((resolve, reject) => {
     const { shape } = photoPosition;
     const { boxW, boxX, boxY } = calculateBoxPixels(photoPosition);
@@ -272,8 +323,17 @@ function renderSingleFrame({ backgroundPath, photoPath, framePath, photoPosition
       ? `,format=rgba,geq=a='if(gt(pow(X-${boxW / 2},2)+pow(Y-${boxW / 2},2),pow(${boxW / 2},2)),0,255)':r='r(X,Y)':g='g(X,Y)':b='b(X,Y)'`
       : ",format=rgba";
 
+    const resolvedFontSize = nameFontSize || getNameFontSize(name);
+    const resolvedFontColor = nameFontColor || "0x6B1220";
+    // Default stays perfectly centered (x=(w-text_w)/2); a left-percent
+    // override shifts that center point left/right for testing off-center
+    // layouts without touching the production default.
+    const resolvedX = (nameLeftPercent !== null && nameLeftPercent !== undefined)
+      ? `(${Math.round((nameLeftPercent / 100) * 720)}-text_w/2)`
+      : "(w-text_w)/2";
+
     const nameOverlay = name
-      ? `,drawtext=text='${escapeForDrawtext(name)}':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=${nameY}:borderw=3:bordercolor=black@0.5`
+      ? `,drawtext=text='${escapeForDrawtext(name)}':fontcolor=${resolvedFontColor}:fontsize=${resolvedFontSize}:x=${resolvedX}:y=${nameY}:borderw=2:bordercolor=white@0.6`
       : "";
 
     const filterComplex = [
